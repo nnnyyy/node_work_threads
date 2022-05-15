@@ -1,66 +1,20 @@
-import { Worker, WorkerOptions } from 'worker_threads';
-const isDev = process.env.NODE_ENV === 'development'
+import {GroupProc} from './workers/wk_groupproc'
+import {Claim} from './workers/wk_claim'
+import {CharacterRecovery} from './workers/wk_characterRecovery'
+import {WorkerThread} from './workerthread'
 
-function workerTs(filename: string, workerOptions: WorkerOptions) { workerOptions.eval = true; if (!workerOptions.workerData) { workerOptions.workerData = {}; } workerOptions.workerData.__filename = filename; return new Worker( ` const wk = require('worker_threads'); require('ts-node').register(); let file = wk.workerData.__filename; require(file); `, workerOptions, ); }
-
-//  워커 스레드
-class WorkerThread {
-    filename:string|URL = ''
-    _worker:Worker|undefined
-    constructor(workerFileName:string|URL) {
-        this.filename = workerFileName
-    }
-
-    run() {
-        this._worker = isDev ? workerTs(`${__dirname}/${String(this.filename)}.ts`, {}) : new Worker(`${__dirname}/${String(this.filename)}.js`, {});         
-        if( this._worker ) {
-            this._worker.on('message', this.onMessage)
-            this._worker.on('exit', this.onExit)
-        }
-    }
-
-    stop() {
-        if(this._worker) this._worker.postMessage(`exit`);
-    }
-
-    isRunning() {
-        return this._worker ? true : false
-    }
-
-    onMessage(val:any) {
-        console.log(`onMessage`, val)
-        this._worker?.terminate().then(d=>{
-            this._worker = undefined
-        })
-    }
-
-    onExit(exitCode:any) {
-        console.log(`onExit`, exitCode)
-    }
-}
-
-class GroupProc extends WorkerThread {
-    constructor() {
-        super("job_groupproc")
-    }
-
-    override onMessage(val:any) {
-        super.onMessage(val)
-    }
-}
-
-class Claim extends WorkerThread {
-}
-
-class CharacterRecovery extends WorkerThread {
+export enum WORKER_TYPE {
+    GROUP_PROC = 0,    
+    CLAIM,
+    CHARACTER_RECOVERY 
 }
 
 class WorkerMan {
-    list:WorkerThread[] = []
+    workers:WorkerThread[] = []
 
     //  초기화
     public initialize() {
-        this.list.push(new GroupProc())
+        this.workers.push(new GroupProc())
     }
 
     //  작업 목록 및 상태 가져오기
@@ -69,12 +23,22 @@ class WorkerMan {
     }
 
     //  단일 실행
-    run() {        
+    run(type:WORKER_TYPE) {
+        let _worker_selected = undefined
+        switch(type) {
+            case WORKER_TYPE.GROUP_PROC: _worker_selected = this.workers.find(w=>w instanceof GroupProc); break;
+            case WORKER_TYPE.CLAIM: _worker_selected = this.workers.find(w=>w instanceof Claim); break;
+            case WORKER_TYPE.CHARACTER_RECOVERY: _worker_selected = this.workers.find(w=>w instanceof CharacterRecovery); break;
+        }
+        
+        if( _worker_selected ) {
+            _worker_selected.run()
+        }
     }
 
     //  전부 실행
     runAll() {
-        this.list.forEach(w=>w.run())
+        this.workers.forEach(w=>w.run())
     }
 
     //  단일 중단

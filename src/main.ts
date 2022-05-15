@@ -4,12 +4,12 @@ const app = express();
 const isDev = process.env.NODE_ENV === 'development'
 console.log('isDev : ', isDev);
 
-import WorkerMan from './workerman'
+import WorkerMan, {WORKER_TYPE} from './workerman'
 
 (async ()=> {    
     
-    WorkerMan.initialize()
-    WorkerMan.runAll()
+    WorkerMan.initialize()    
+    WorkerMan.run(WORKER_TYPE.GROUP_PROC)
 
     app.listen(3000, ()=> {
         console.log('main process is running')    
