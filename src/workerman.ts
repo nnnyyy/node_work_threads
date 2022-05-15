@@ -15,6 +15,8 @@ class WorkerMan {
     //  초기화
     public initialize() {
         this.workers.push(new GroupProc())
+        this.workers.push(new Claim())
+        this.workers.push(new CharacterRecovery())
     }
 
     //  작업 목록 및 상태 가져오기
@@ -22,18 +24,20 @@ class WorkerMan {
 
     }
 
-    //  단일 실행
-    run(type:WORKER_TYPE) {
+    getWorker(type:WORKER_TYPE) : WorkerThread | undefined {
         let _worker_selected = undefined
         switch(type) {
             case WORKER_TYPE.GROUP_PROC: _worker_selected = this.workers.find(w=>w instanceof GroupProc); break;
             case WORKER_TYPE.CLAIM: _worker_selected = this.workers.find(w=>w instanceof Claim); break;
             case WORKER_TYPE.CHARACTER_RECOVERY: _worker_selected = this.workers.find(w=>w instanceof CharacterRecovery); break;
         }
-        
-        if( _worker_selected ) {
-            _worker_selected.run()
-        }
+
+        return _worker_selected
+    }
+
+    //  단일 실행
+    run(type:WORKER_TYPE) {
+        this.getWorker(type)?.run()
     }
 
     //  전부 실행
@@ -42,11 +46,13 @@ class WorkerMan {
     }
 
     //  단일 중단
-    stop() {        
+    stop(type:WORKER_TYPE) {
+        this.getWorker(type)?.stop()
     }
 
-    //  단일 중단
-    stopAll() {        
+    //  전부 중단
+    stopAll() {
+        this.workers.forEach(w=>w.stop())
     }
 }
 

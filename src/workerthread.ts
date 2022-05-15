@@ -15,8 +15,8 @@ export class WorkerThread {
         if( this.isRunning() ) return
         this._worker = isDev ? workerTs(`${__dirname}/jobs/${String(this.filename)}.ts`, {}) : new Worker(`${__dirname}/jobs/${String(this.filename)}.js`, {});         
         if( this._worker ) {
-            this._worker.on('message', this.onMessage)
-            this._worker.on('exit', this.onExit)
+            this._worker.on('message', val=>this.onMessage(val))
+            this._worker.on('exit', code=>this.onExit(code))
         }
     }
 
@@ -30,12 +30,14 @@ export class WorkerThread {
 
     onMessage(val:any) {
         console.log(`onMessage`, val)
-        this._worker?.terminate().then(d=>{
-            this._worker = undefined
-        })
+        if( val?.state == 'exit' ) {
+            this._worker?.terminate().then(d=>{
+                this._worker = undefined
+            })
+        }        
     }
 
     onExit(exitCode:any) {
-        console.log(`onExit`, exitCode)
+        console.log(`${this.filename} onExit`, exitCode)
     }
 }

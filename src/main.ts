@@ -9,11 +9,15 @@ import WorkerMan, {WORKER_TYPE} from './workerman'
 (async ()=> {    
     
     WorkerMan.initialize()    
-    WorkerMan.run(WORKER_TYPE.GROUP_PROC)
+    WorkerMan.runAll()
 
     app.listen(3000, ()=> {
         console.log('main process is running')    
     })
+
+    setTimeout(()=>{
+        WorkerMan.stopAll()
+    }, 5000)
 })()
 
 process.on('exit', ()=> {
