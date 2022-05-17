@@ -8,7 +8,7 @@ export class GroupProc extends WorkerThread {
         super("job_groupproc", sharedView32)
     }
 
-    override onMessage(val:any) {
+    onMessage(val:any) {
         super.onMessage(val)
     }
 }

@@ -5,7 +5,7 @@ export class Claim extends WorkerThread {
         super("job_claim", sharedView32)
     }
 
-    override onMessage(val:any) {
+    onMessage(val:any) {
         super.onMessage(val)
     }
 }

@@ -5,7 +5,7 @@ export class CharacterRecovery extends WorkerThread {
         super("job_charrecovery", sharedView32)
     }
 
-    override onMessage(val:any) {
+    onMessage(val:any) {
         super.onMessage(val)
     }
 }
