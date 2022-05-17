@@ -10,13 +10,26 @@ export enum WORKER_TYPE {
 }
 
 class WorkerMan {
+    sharedArrayBuffer!:SharedArrayBuffer
+    sharedView32!:Int32Array
     workers:WorkerThread[] = []
 
     //  초기화
     public initialize() {
-        this.workers.push(new GroupProc())
-        this.workers.push(new Claim())
-        this.workers.push(new CharacterRecovery())
+        this.sharedArrayBuffer = new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT * 3)
+        this.sharedView32 = new Int32Array(this.sharedArrayBuffer)
+        
+        this.workers.push(new GroupProc(this.sharedView32))
+        this.workers.push(new Claim(this.sharedView32))
+        this.workers.push(new CharacterRecovery(this.sharedView32))
+
+        setTimeout(()=>{
+            this.sharedView32[0] = 316
+        },5000)
+
+        setTimeout(()=>{
+            this.sharedView32[0] = 22
+        },8000)
     }
 
     //  작업 목록 및 상태 가져오기

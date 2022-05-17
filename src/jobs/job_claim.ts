@@ -5,7 +5,6 @@ let isRunning = true;
 (async ()=> {
     console.log('[worker] claim start')
     parentPort?.on('message', ()=>{
-        console.log('[worker] message received')
         isRunning=false
     })
     //await sleep(10000)    

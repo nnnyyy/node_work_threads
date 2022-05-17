@@ -14,10 +14,6 @@ import WorkerMan, {WORKER_TYPE} from './workerman'
     app.listen(3000, ()=> {
         console.log('main process is running')    
     })
-
-    setTimeout(()=>{
-        WorkerMan.stopAll()
-    }, 5000)
 })()
 
 process.on('exit', ()=> {

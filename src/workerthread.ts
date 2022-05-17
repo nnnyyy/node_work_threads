@@ -7,8 +7,10 @@ function workerTs(filename: string, workerOptions: WorkerOptions) { workerOption
 export class WorkerThread {
     filename:string|URL = ''
     _worker:Worker|undefined
-    constructor(workerFileName:string|URL) {
+    sharedView32!:Int32Array
+    constructor(workerFileName:string|URL, sharedView32:Int32Array) {
         this.filename = workerFileName
+        this.sharedView32 = sharedView32
     }
 
     run() {
@@ -17,6 +19,7 @@ export class WorkerThread {
         if( this._worker ) {
             this._worker.on('message', val=>this.onMessage(val))
             this._worker.on('exit', code=>this.onExit(code))
+            this._worker.postMessage({ shared: this.sharedView32 })
         }
     }
 
